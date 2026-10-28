@@ -862,9 +862,9 @@ resource ui2stgacc_roledefinition 'Microsoft.Authorization/roleDefinitions@2022-
 // Details: https://learn.microsoft.com/en-us/answers/questions/287573/authorization-failed-when-when-writing-a-roleassig.html
 resource roleAssignment2 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: ui2stgacc
-  name: guid(resourceGroup().id, ui2stgacc_mi.id, ui2stgacc_roledefinition.id)
+  name: guid(resourceGroup().id, ui2stgacc_mi.id, ui2stgacc_roledefinition_app_service.id)
   properties: {
-    roleDefinitionId: ui2stgacc_roledefinition.id
+    roleDefinitionId: ui2stgacc_roledefinition_app_service.id
     principalId: ui2stgacc_mi.properties.principalId
     principalType: 'ServicePrincipal'
   }
