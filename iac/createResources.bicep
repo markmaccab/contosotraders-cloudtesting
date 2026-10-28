@@ -265,12 +265,7 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' = {
       tags: resourceTags
       properties: {
         contentType: 'endpoint url (fqdn) of the (internal) carts api'
-
-// Line 268 - Before
-	property: containerApp.properties.fqdn
-        value: deployPrivateEndpoints ? cartsinternalapiaca.properties.configuration.ingress.fqdn : ''
-// After - Add null coalescing
-	property: containerApp.properties.fqdn ?? 'defaultValue'
+        value: cartsinternalapiaca.properties.configuration.ingress.fqdn
       }
     }
 
@@ -321,7 +316,7 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' = {
       tags: resourceTags
       properties: {
         contentType: 'subnet id of the aca subnet'
-        value: deployPrivateEndpoints ? vnet.properties.subnets[0].id : ''
+        value: vnet.properties.subnets[0].id
       }
     }
 
@@ -1436,16 +1431,16 @@ resource jumpboxnic 'Microsoft.Network/networkInterfaces@2022-07-01' =
             primary: true
             privateIPAllocationMethod: 'Dynamic'
             subnet: {
-              id: deployPrivateEndpoints ? vnet.properties.subnets[1].id : ''
+              id: vnet.properties.subnets[1].id
             }
             publicIPAddress: {
-              id: deployPrivateEndpoints ? jumpboxpublicip.id : ''
+              id: jumpboxpublicip.id
             }
           }
         }
       ]
       networkSecurityGroup: {
-        id: deployPrivateEndpoints ? jumpboxnsg.id : ''
+        id: jumpboxnsg.id
       }
       nicType: 'Standard'
     }
@@ -1478,7 +1473,7 @@ resource jumpboxvm 'Microsoft.Compute/virtualMachines@2022-08-01' =
       networkProfile: {
         networkInterfaces: [
           {
-            id: deployPrivateEndpoints ? jumpboxnic.id : ''
+            id: jumpboxnic.id
             properties: {
               deleteOption: 'Delete'
             }
@@ -1501,7 +1496,7 @@ resource jumpboxvmschedule 'Microsoft.DevTestLab/schedules@2018-09-15' =
     location: resourceLocation
     tags: resourceTags
     properties: {
-      targetResourceId: deployPrivateEndpoints ? jumpboxvm.id : ''
+      targetResourceId: jumpboxvm.id
       dailyRecurrence: {
         time: '2100'
       }
@@ -1522,15 +1517,11 @@ module privateDnsZone './createPrivateDnsZone.bicep' =
   if (deployPrivateEndpoints) {
     name: 'createPrivateDnsZone'
     params: {
-      privateDnsZoneName: deployPrivateEndpoints
-        ? join(skip(split(cartsinternalapiaca.properties.configuration.ingress.fqdn, '.'), 2), '.')
-        : ''
-      privateDnsZoneVnetId: deployPrivateEndpoints ? vnet.id : ''
+      privateDnsZoneName: join(skip(split(cartsinternalapiaca.properties.configuration.ingress.fqdn, '.'), 2), '.')
+      privateDnsZoneVnetId: vnet.id
       privateDnsZoneVnetLinkName: privateDnsZoneVnetLinkName
-      privateDnsZoneARecordName: deployPrivateEndpoints
-        ? join(take(split(cartsinternalapiaca.properties.configuration.ingress.fqdn, '.'), 2), '.')
-        : ''
-      privateDnsZoneARecordIp: deployPrivateEndpoints ? cartsinternalapiacaenv.properties.staticIp : ''
+      privateDnsZoneARecordName: join(take(split(cartsinternalapiaca.properties.configuration.ingress.fqdn, '.'), 2), '.')
+      privateDnsZoneARecordIp: cartsinternalapiacaenv.properties.staticIp
       resourceTags: resourceTags
     }
   }
@@ -1547,7 +1538,7 @@ resource cartsinternalapiacaenv 'Microsoft.App/managedEnvironments@2022-06-01-pr
     properties: {
       zoneRedundant: false
       vnetConfiguration: {
-        infrastructureSubnetId: deployPrivateEndpoints ? vnet.properties.subnets[0].id : ''
+        infrastructureSubnetId: vnet.properties.subnets[0].id
         internal: true
       }
     }
@@ -1747,7 +1738,7 @@ resource chaosaksexperiment 'Microsoft.Chaos/experiments@2022-10-01-preview' = {
                 parameters: [
                   {
                     key: 'jsonSpec'
-                    value: '{'action':'pod-failure','mode':'all','duration':'3s','selector':{'namespaces':['default'],'labelSelectors':{'app':'contoso-traders-products'}}}'
+                    value: '{"action":"pod-failure","mode":"all","duration":"3s","selector":{"namespaces":["default"],"labelSelectors":{"app":"contoso-traders-products"}}}'
                   }
                 ]
               }
@@ -1759,10 +1750,8 @@ resource chaosaksexperiment 'Microsoft.Chaos/experiments@2022-10-01-preview' = {
   }
 }
 
-```bicep
 // outputs
 ////////////////////////////////////////////////////////////////////////////////
 
 output cartsApiEndpoint string = 'https://${cartsapiaca.properties.configuration.ingress.fqdn}'
 output uiCdnEndpoint string = 'https://${cdnprofile_ui2endpoint.properties.hostName}'
-```
