@@ -882,7 +882,7 @@ resource deploymentScript2 'Microsoft.Resources/deploymentScripts@2020-10-01' = 
   }
   dependsOn: [
     // we need to ensure we wait for the role assignment to be deployed before trying to access the storage account
-    roleAssignment
+    roleAssignment2
   ]
   properties: {
     azPowerShellVersion: '3.0'
@@ -1742,7 +1742,7 @@ resource chaosaksexperiment 'Microsoft.Chaos/experiments@2022-10-01-preview' = {
                 parameters: [
                   {
                     key: 'jsonSpec'
-                    value: '{\'action\':\'pod-failure\',\'mode\':\'all\',\'duration\':\'3s\',\'selector\':{\'namespaces\':[\'default\'],\'labelSelectors\':{\'app\':\'contoso-traders-products\'}}}'
+                    value: '{'action':'pod-failure','mode':'all','duration':'3s','selector':{'namespaces':['default'],'labelSelectors':{'app':'contoso-traders-products'}}}'
                   }
                 ]
               }
