@@ -265,7 +265,12 @@ resource kv 'Microsoft.KeyVault/vaults@2022-07-01' = {
       tags: resourceTags
       properties: {
         contentType: 'endpoint url (fqdn) of the (internal) carts api'
+
+// Line 268 - Before
+	property: containerApp.properties.fqdn
         value: deployPrivateEndpoints ? cartsinternalapiaca.properties.configuration.ingress.fqdn : ''
+// After - Add null coalescing
+	property: containerApp.properties.fqdn ?? 'defaultValue'
       }
     }
 
